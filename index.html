@@ -3,311 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>교육 신청 카드</title>
-    <!-- SweetAlert2 라이브러리 -->
-    <script src="https://cdn.jsdelivr.net"></script>
+    <title>English Study Manager</title>
+    <link href="https://jsdelivr.net" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #4A90E2;
-            --accent-color: #00A86B;
-            --text-main: #333333;
+        body { background-color: #f0f2f5; font-family: 'Pretendard', sans-serif; }
+        .app-container { max-width: 500px; margin: 0 auto; background: white; height: 100vh; display: flex; flex-direction: column; position: relative; }
+        .tab-content { flex: 1; overflow: hidden; }
+        #sentenceList { height: calc(100vh - 110px); overflow-y: auto; padding: 10px; }
+        .sentence-item { 
+            background: #fff; border: 1px solid #eee; border-radius: 10px; 
+            margin-bottom: 10px; padding: 15px; cursor: pointer; transition: 0.2s;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
-
-        /* 배경을 깔끔한 흰색으로 설정 */
-        body {
-            background-color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            padding: 20px;
-            color: var(--text-main);
+        .sentence-item:active { background-color: #f8f9fa; transform: scale(0.98); }
+        .importance-star { color: #ffc107; font-weight: bold; }
+        .is-memorized { color: #ccc; text-decoration: line-through; }
+        .loading-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%; 
+            background: rgba(255,255,255,0.8); display: none; align-items: center; 
+            justify-content: center; z-index: 9999;
         }
-
-        /* 메인 화면 레이아웃 */
-        .main-wrapper {
-            width: 100%;
-            max-width: 450px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .header-container {
-            width: 100%;
-            margin-bottom: 25px;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* 흰 배경에 맞는 은은한 그림자 */
-            line-height: 0;
-        }
-    
-        .title-img { width: 100%; height: auto; display: block; }
-
-        /* 메인 버튼: 이미지 폭 80%, 글자 1.5배 강조 */
-        .open-btn {
-            width: 80%;
-            padding: 18px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 24px;
-            font-weight: 900;
-            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.2);
-            transition: transform 0.2s ease;
-        }
-
-        .open-btn:active { transform: scale(0.96); }
-
-        /* 모달 오버레이 */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        /* 모달 콘텐츠 */
-        /* 1. 모달 전체 폭 고정 */
-        .modal-content {
-            background: white;
-            width: 95%;
-            max-width: 450px; /* 타이틀 이미지의 max-width와 동일하게 설정 */
-            border-radius: 20px;
-            padding: 20px; /* 패딩이 전체 폭에 영향을 주지 않도록 설정됨 */
-            max-height: 95vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* 2. 타이틀 이미지 영역 고정 */
-        .header-container {
-            width: 100%;
-            margin-bottom: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            flex-shrink: 0; /* 이미지가 줄어들지 않도록 고정 */
-        }
-        
-        .title-img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        
-        /* 3. 입력창이 이미지 폭을 절대 넘지 않도록 설정 */
-        .form-group {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            width: 100%; /* 부모 너비 100% 유지 */
-        }
-        
-        .form-group label {
-            width: 80px; /* 레이블 너비를 살짝 줄여 공간 확보 */
-            flex-shrink: 0; /* 레이블 크기 고정 */
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        /* 핵심: input의 폭을 계산하여 이미지 폭 안으로 가둠 */
-        input[type="text"], 
-        input[type="tel"], 
-        select {
-            flex: 1; /* 남은 공간을 차지하되 */
-            min-width: 0; /* flex 자식의 최소 너비 제한 해제 (이미지 밖으로 나가는 현상 방지) */
-            width: 100%; /* 가용 폭 전체 사용 */
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 18px;
-            background: #fafafa;
-        }
-        
-        /* 성별 라디오 그룹 정렬 */
-        .radio-group {
-            flex: 1;
-            display: flex;
-            gap: 15px;
-            min-width: 0;
-        }
-        
-        /* 4. 동의서 섹션 폭 맞춤 */
-        .agreement-section {
-            width: 100%;
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            border: 1px solid #eee;
-            word-break: keep-all; /* 문구가 보기 좋게 줄바꿈되도록 */
-        }
-
-        /* 하단 버튼 그룹 */
-        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-group button {
-            flex: 1;
-            padding: 18px;
-            border-radius: 12px;
-            border: none;
-            font-size: 19px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .submit-btn { background: var(--primary-color); color: white; }
-        .close-btn { background: #eeeeee; color: #555555; }
     </style>
 </head>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <body>
-    <div class="main-wrapper">
-        <!-- 메인 이미지 -->
-        <div class="header-container">
-            <img src="img/SignUp_Main.png" alt="메인 배너" class="title-img">
-        </div>
-        <!-- 신청하기 버튼 -->
-        <button class="open-btn" onclick="toggleModal(true)">교육 신청하기</button>
-    </div>
 
-    <!-- 신청 모달창 -->
-    <div class="modal-overlay" id="modal">
-        <div class="modal-content">
-            <div class="header-container" style="margin-bottom: 20px; border-radius: 10px; box-shadow: none;">
-                <img src="img/SignUp.png" alt="신청 타이틀" class="title-img">
+<div class="app-container shadow-sm">
+    <div id="loading" class="loading-overlay"><div class="spinner-border text-primary"></div></div>
+
+    <!-- 탭 메뉴 -->
+    <ul class="nav nav-pills nav-fill bg-light p-2" id="studyTab" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#practice">연습</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#sentences" onclick="fetchData()">문장</button></li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- 연습 탭 -->
+        <div class="tab-pane fade show active p-4 text-center" id="practice">
+            <h4 class="mt-5">오늘의 복습</h4>
+            <p class="text-muted">문장 탭에서 데이터를 관리하세요.</p>
+        </div>
+
+        <!-- 문장 탭 -->
+        <div class="tab-pane fade h-100" id="sentences">
+            <div class="p-3 d-flex justify-content-between align-items-center bg-white border-bottom">
+                <h6 class="fw-bold m-0">문장 리스트</h6>
+                <button class="btn btn-primary btn-sm" onclick="openEditModal()">문장 추가</button>
             </div>
-
-            <form id="applyForm">
-                <div class="form-group">
-                    <label>성명</label>
-                    <input type="text" id="swal-input-name" placeholder="성함을 입력하세요" required>
-                </div>
-
-                <div class="form-group">
-                    <label>성별</label>
-                    <div class="radio-group">
-                        <label class="radio-item"><input type="radio" name="gender" value="남" required> 남성</label>
-                        <label class="radio-item"><input type="radio" name="gender" value="여"> 여성</label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>나이</label>
-                    <select id="swal-input-age" required>
-                        <option value="">선택하세요</option>
-                        <option value="30대">30대</option>
-                        <option value="40대">40대</option>
-                        <option value="50대">50대</option>
-                        <option value="60대 이상">60대 이상</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>전화번호</label>
-                    <input type="tel" id="swal-input-phone" placeholder="010-0000-0000" maxlength="13" required>
-                </div>
-
-                <div class="form-group">
-                    <label>주소</label>
-                    <input type="text" id="swal-input-address" placeholder="주소를 입력해주세요" required>
-                </div>
-
-                <!-- 동의서 섹션 -->
-                <div class="agreement-section">
-                    <div style="font-size:16px; font-weight:bold; color:#444; margin-bottom:8px;">[개인정보처리동의서]</div>
-                    <div style="font-size:14px; color:#777; line-height:1.5; letter-spacing:-0.3px;">
-                        귀하는 본 설문에 개인정보(이름, 전화번호)가 활용되는 것에 동의합니다. 
-                        처리된 개인정보는 세미나 목적으로만 사용되며 [법률 제 148395호]에 의해 다른 용도나 목적으로 사용할 수 없습니다.
-                    </div>
-                    
-                    <label style="display:flex; align-items:center; margin-top:12px; cursor:pointer; font-size:17px; color:#333; font-weight:bold;">
-                        <input type="checkbox" id="swal-input-agree" required
-                               style="margin:0 8px 0 0; width:22px; height:22px; accent-color:#00A86B;">
-                        <span>동의합니다</span>
-                    </label>
-                </div>
-
-                <div class="btn-group">
-                    <button type="button" class="close-btn" onclick="toggleModal(false)">닫기</button>
-                    <button type="submit" class="submit-btn">신청합니다</button>
-                </div>
-            </form>
+            <div id="sentenceList">
+                <div class="text-center py-5 text-muted">데이터를 불러오는 중...</div>
+            </div>
         </div>
     </div>
+</div>
 
-    <script>
-        function toggleModal(show) {
-            const modal = document.getElementById('modal');
-            modal.style.display = show ? 'flex' : 'none';
-            document.body.style.overflow = show ? 'hidden' : 'auto';
+<!-- Edit 모달 -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title fw-bold" id="modalTitle">편집</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editRow">
+                <div class="mb-3">
+                    <label class="small text-muted">영어 문장</label>
+                    <input type="text" id="engText" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="small text-muted">한글 번역</label>
+                    <input type="text" id="korText" class="form-control">
+                </div>
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label class="small text-muted">중요도</label>
+                        <select id="importance" class="form-select">
+                            <option value="1">★</option>
+                            <option value="2">★★</option>
+                            <option value="3">★★★</option>
+                        </select>
+                    </div>
+                    <div class="col-6 mb-3 d-flex align-items-end">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="isMemorized">
+                            <label class="form-check-label">암기</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-outline-danger btn-sm" id="btnDelete" onclick="saveData('delete')">삭제</button>
+                <div>
+                    <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">닫기</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="saveData('save')">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://jsdelivr.net"></script>
+<script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhtf2JNQYQPS6eZzo5JLKYydw5jTDWmDQ8PehFfd-xv8tv5AN4IMHiJzPJboTsZt9B/exec';
+    let sentences = [];
+    const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+
+    // 1. 데이터 불러오기 (Read)
+    async function fetchData() {
+        showLoading(true);
+        try {
+            const response = await fetch(SCRIPT_URL);
+            sentences = await response.json();
+            renderList();
+        } catch (e) {
+            console.error("데이터 로드 실패", e);
+            document.getElementById('sentenceList').innerHTML = "데이터를 불러오지 못했습니다.";
         }
+        showLoading(false);
+    }
 
-        // 전화번호 하이픈 자동 삽입
-        const phoneInput = document.getElementById('swal-input-phone');
-        phoneInput.addEventListener('input', (e) => {
-            let val = e.target.value.replace(/[^0-9]/g, '');
-            if (val.length <= 3) e.target.value = val;
-            else if (val.length <= 7) e.target.value = val.slice(0, 3) + '-' + val.slice(3);
-            else e.target.value = val.slice(0, 3) + '-' + val.slice(3, 7) + '-' + val.slice(7, 11);
-        });
-
-        // 폼 제출 이벤트
-        document.getElementById('applyForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const formData = {
-                name: document.getElementById('swal-input-name').value,
-                gender: document.querySelector('input[name="gender"]:checked').value,
-                age: document.getElementById('swal-input-age').value,
-                phone: document.getElementById('swal-input-phone').value,
-                address: document.getElementById('swal-input-address').value
-            };
-
-            await sendData(formData);
-        });
-
-        // 데이터 전송 함수
-        async function sendData(formData) {
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbw_iFKy_VrJ_VepgBgTzLoJO4_a2wHUIXCK2Q--u0rOwZ80SfFErYbVC50VRG2qGSekWw/exec';
+    // 2. 리스트 렌더링
+    function renderList() {
+        const listDiv = document.getElementById('sentenceList');
+        listDiv.innerHTML = '';
+        sentences.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'sentence-item shadow-sm';
+            div.onclick = () => openEditModal(index);
             
-            try {
-                Swal.fire({ 
-                    title: '전송 중...', 
-                    allowOutsideClick: false, 
-                    didOpen: () => Swal.showLoading() 
-                });
+            const stars = '★'.repeat(item.importance || 1);
+            const memorizedClass = item.isMemorized ? 'is-memorized' : '';
 
-                await fetch(scriptURL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
+            div.innerHTML = `
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="fw-bold ${memorizedClass}">${item.eng}</div>
+                        <div class="small text-secondary">${item.kor}</div>
+                    </div>
+                    <div class="importance-star small">${stars}</div>
+                </div>
+            `;
+            listDiv.appendChild(div);
+        });
+    }
 
-                await Swal.fire({
-                    icon: 'success',
-                    title: '신청 완료!',
-                    html: `<b style="font-size:1.2rem;">${formData.name}님</b><br><br>교육 신청이 정상적으로 되었습니다.`,
-                    confirmButtonColor: '#4A90E2',
-                    confirmButtonText: '확인'
-                });
-                
-                location.reload();
-                
-            } catch (error) {
-                console.error('Error!', error.message);
-                Swal.fire('오류 발생', '전송에 실패했습니다. 다시 시도해주세요.', 'error');
-            }
+    // 3. 모달 열기
+    function openEditModal(index = null) {
+        document.getElementById('editRow').value = index === null ? "" : index;
+        if (index !== null) {
+            const data = sentences[index];
+            document.getElementById('engText').value = data.eng;
+            document.getElementById('korText').value = data.kor;
+            document.getElementById('importance').value = data.importance;
+            document.getElementById('isMemorized').checked = data.isMemorized;
+            document.getElementById('btnDelete').style.visibility = "visible";
+        } else {
+            document.getElementById('engText').value = "";
+            document.getElementById('korText').value = "";
+            document.getElementById('importance').value = 1;
+            document.getElementById('isMemorized').checked = false;
+            document.getElementById('btnDelete').style.visibility = "hidden";
         }
-    </script>
+        editModal.show();
+    }
+
+    // 4. 저장/삭제 (Create, Update, Delete)
+    async function saveData(type) {
+        const index = document.getElementById('editRow').value;
+        const payload = {
+            action: type === 'delete' ? 'delete' : (index === "" ? 'insert' : 'update'),
+            index: index !== "" ? parseInt(index) : null,
+            data: {
+                eng: document.getElementById('engText').value,
+                kor: document.getElementById('korText').value,
+                importance: document.getElementById('importance').value,
+                isMemorized: document.getElementById('isMemorized').checked
+            }
+        };
+
+        showLoading(true);
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            editModal.hide();
+            await fetchData(); // 최신 데이터 리로드
+        } catch (e) {
+            alert("처리 중 오류가 발생했습니다.");
+        }
+        showLoading(false);
+    }
+
+    function showLoading(show) {
+        document.getElementById('loading').style.display = show ? 'flex' : 'none';
+    }
+
+    // 첫 실행 시 로드
+    window.onload = fetchData;
+</script>
 </body>
 </html>
