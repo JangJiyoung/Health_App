@@ -3,311 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>교육 신청 카드</title>
-    <!-- SweetAlert2 라이브러리 -->
-    <script src="https://cdn.jsdelivr.net"></script>
+    <title>AI English Study Pro</title>
     <style>
-        :root {
-            --primary-color: #4A90E2;
-            --accent-color: #00A86B;
-            --text-main: #333333;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
-
-        /* 배경을 깔끔한 흰색으로 설정 */
-        body {
-            background-color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            padding: 20px;
-            color: var(--text-main);
-        }
-
-        /* 메인 화면 레이아웃 */
-        .main-wrapper {
-            width: 100%;
-            max-width: 450px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .header-container {
-            width: 100%;
-            margin-bottom: 25px;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* 흰 배경에 맞는 은은한 그림자 */
-            line-height: 0;
-        }
-    
-        .title-img { width: 100%; height: auto; display: block; }
-
-        /* 메인 버튼: 이미지 폭 80%, 글자 1.5배 강조 */
-        .open-btn {
-            width: 80%;
-            padding: 18px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 24px;
-            font-weight: 900;
-            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.2);
-            transition: transform 0.2s ease;
-        }
-
-        .open-btn:active { transform: scale(0.96); }
-
-        /* 모달 오버레이 */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        /* 모달 콘텐츠 */
-        /* 1. 모달 전체 폭 고정 */
-        .modal-content {
-            background: white;
-            width: 95%;
-            max-width: 450px; /* 타이틀 이미지의 max-width와 동일하게 설정 */
-            border-radius: 20px;
-            padding: 20px; /* 패딩이 전체 폭에 영향을 주지 않도록 설정됨 */
-            max-height: 95vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            display: flex;
-            flex-direction: column;
-        }
+        :root { --primary: #4A90E2; --bg: #f8f9fa; --text: #333; --success: #2ecc71; --danger: #ff4757; }
+        body { font-family: 'Pretendard', -apple-system, sans-serif; background: #eee; margin: 0; display: flex; justify-content: center; height: 100vh; }
         
-        /* 2. 타이틀 이미지 영역 고정 */
-        .header-container {
-            width: 100%;
-            margin-bottom: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            flex-shrink: 0; /* 이미지가 줄어들지 않도록 고정 */
-        }
-        
-        .title-img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        
-        /* 3. 입력창이 이미지 폭을 절대 넘지 않도록 설정 */
-        .form-group {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            width: 100%; /* 부모 너비 100% 유지 */
-        }
-        
-        .form-group label {
-            width: 80px; /* 레이블 너비를 살짝 줄여 공간 확보 */
-            flex-shrink: 0; /* 레이블 크기 고정 */
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        /* 핵심: input의 폭을 계산하여 이미지 폭 안으로 가둠 */
-        input[type="text"], 
-        input[type="tel"], 
-        select {
-            flex: 1; /* 남은 공간을 차지하되 */
-            min-width: 0; /* flex 자식의 최소 너비 제한 해제 (이미지 밖으로 나가는 현상 방지) */
-            width: 100%; /* 가용 폭 전체 사용 */
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 18px;
-            background: #fafafa;
-        }
-        
-        /* 성별 라디오 그룹 정렬 */
-        .radio-group {
-            flex: 1;
-            display: flex;
-            gap: 15px;
-            min-width: 0;
-        }
-        
-        /* 4. 동의서 섹션 폭 맞춤 */
-        .agreement-section {
-            width: 100%;
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            border: 1px solid #eee;
-            word-break: keep-all; /* 문구가 보기 좋게 줄바꿈되도록 */
-        }
+        .app-container { width: 100%; max-width: 450px; background: white; position: relative; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
 
-        /* 하단 버튼 그룹 */
-        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-group button {
-            flex: 1;
-            padding: 18px;
-            border-radius: 12px;
-            border: none;
-            font-size: 19px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .submit-btn { background: var(--primary-color); color: white; }
-        .close-btn { background: #eeeeee; color: #555555; }
+        /* 상단 바 */
+        .top-bar { padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; background: #fff; }
+        .progress-bar { flex: 1; height: 6px; background: #eee; border-radius: 3px; margin: 0 15px; overflow: hidden; }
+        #progressFill { width: 0%; height: 100%; background: var(--primary); transition: 0.3s; }
+        
+        /* 탭 메뉴 */
+        .tabs { display: flex; border-bottom: 1px solid #eee; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: #fdfdfd; cursor: pointer; color: #999; font-weight: bold; font-size: 16px; }
+        .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); background: white; }
+
+        .content-area { flex: 1; overflow-y: auto; display: none; }
+        .content-area.active { display: flex; flex-direction: column; }
+
+        /* [학습 탭] */
+        #studyContent { justify-content: center; align-items: center; padding: 40px 20px; text-align: center; }
+        #displayEng { font-size: 28px; font-weight: bold; min-height: 80px; color: var(--text); line-height: 1.3; margin-bottom: 10px; }
+        #displayKor { font-size: 18px; color: #888; transition: 0.3s; }
+        #displayKor.hidden { opacity: 0; }
+
+        .play-controls { display: flex; flex-direction: column; gap: 30px; align-items: center; width: 100%; }
+        .btn-group { display: flex; gap: 20px; align-items: center; }
+        
+        /* 버튼 디자인 */
+        .circle-btn { border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background: #f1f2f6; color: #555; overflow: hidden;}
+        .btn-small { width: 55px; height: 55px; font-size: 20px; }
+        .btn-large { width: 75px; height: 75px; font-size: 28px; }
+        .btn-main { width: 90px; height: 90px; background: var(--primary); color: white; font-size: 35px; }
+        
+        /* 원어민 아이콘 스타일 (이미지 반영) */
+        .native-icon { width: 45px; height: 45px; object-fit: contain; }
+
+        /* 녹음 버튼 특수 상태 */
+        .btn-rec { background: var(--danger); color: white; }
+        .btn-rec.recording { background: white !important; border: 3px solid var(--danger); }
+        .btn-rec.recording i::before { content: "■"; color: var(--danger); }
+
+        /* [문장 탭] */
+        .sticky-header { position: sticky; top: 0; background: white; padding: 15px; border-bottom: 1px solid #eee; z-index: 5; display: flex; justify-content: space-between; align-items: center; }
+        #sentenceList { flex: 1; overflow-y: auto; padding: 10px; }
+        .sentence-item { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 15px; margin-bottom: 10px; cursor: pointer; text-align: left; }
+
+        /* [모달] */
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 100; align-items: center; justify-content: center; }
+        .modal { width: 85%; background: white; border-radius: 20px; padding: 25px; box-sizing: border-box; }
+        .input-label { display: block; font-size: 14px; font-weight: bold; margin-bottom: 8px; color: #555; text-align: left; }
+        .edit-box { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        .flex-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        input[type="checkbox"].large-check { width: 28px; height: 28px; accent-color: var(--success); cursor: pointer; }
+        
+        .modal-footer { display: flex; gap: 10px; margin-top: 10px; }
+        .modal-footer button { flex: 1; padding: 14px; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .btn-cancel { background: #eee; color: #666; }
+        .btn-save { background: var(--primary); color: white; }
+        .btn-del { background: #ffeaa7; color: #d63031; }
+
+        /* 설정 창 */
+        .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .switch { position: relative; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background: var(--primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
     </style>
 </head>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <body>
-    <div class="main-wrapper">
-        <!-- 메인 이미지 -->
-        <div class="header-container">
-            <img src="img/SignUp_Main.png" alt="메인 배너" class="title-img">
-        </div>
-        <!-- 신청하기 버튼 -->
-        <button class="open-btn" onclick="toggleModal(true)">교육 신청하기</button>
+
+<div class="app-container">
+    <!-- 상단 바 -->
+    <div class="top-bar">
+        <span id="statText" style="font-weight:bold; font-size:14px; color:var(--primary);">0/0</span>
+        <div class="progress-bar"><div id="progressFill"></div></div>
+        <button onclick="openOverlay('settingModal')" style="border:none; background:none; font-size:22px; cursor:pointer;">⚙️</button>
     </div>
 
-    <!-- 신청 모달창 -->
-    <div class="modal-overlay" id="modal">
-        <div class="modal-content">
-            <div class="header-container" style="margin-bottom: 20px; border-radius: 10px; box-shadow: none;">
-                <img src="img/SignUp.png" alt="신청 타이틀" class="title-img">
+    <!-- 탭 -->
+    <div class="tabs">
+        <button class="tab-btn active" id="tabStudy" onclick="switchTab('study')">연습</button>
+        <button class="tab-btn" id="tabList" onclick="switchTab('list')">문장</button>
+    </div>
+
+    <!-- 연습 탭 -->
+    <div id="studyContent" class="content-area active">
+        <div style="margin-bottom: 50px; width: 100%;">
+            <div id="displayEng">Loading...</div>
+            <div id="displayKor">데이터를 로드 중입니다.</div>
+            <button onclick="toggleKor()" style="margin-top:20px; border:1px solid #ddd; background:white; padding:6px 18px; border-radius:20px; font-size:13px; cursor:pointer; color:#666;">한글 On/Off</button>
+        </div>
+
+        <div class="play-controls">
+            <div class="btn-group">
+                <button class="circle-btn btn-small" onclick="move(-1)">◁</button>
+                <button class="circle-btn btn-main" id="btnMainPlay" onclick="togglePlay()">▶</button>
+                <button class="circle-btn btn-small" onclick="move(1)">▷</button>
             </div>
+            <div class="btn-group">
+                <button class="circle-btn btn-large btn-rec" id="btnRecord" onclick="toggleRecord()"><i id="recIcon">🎤</i></button>
+                <button class="circle-btn btn-large" id="btnPlayRec" onclick="playMyVoice()">👂</button>
+                <!-- 원어민 버튼: 제공해주신 이미지 스타일 아이콘 적용 -->
+                <button class="circle-btn btn-large" onclick="speakCurrent()">
+                    <svg class="native-icon" viewBox="0 0 100 100" xmlns="http://w3.org">
+                        <path d="M30 30c-8 0-15 7-15 15v10c0 8 7 15 15 15h5l15 15V15L35 30h-5z" fill="black"/>
+                        <path d="M60 30c5 5 8 12 8 20s-3 15-8 20m10-50c8 8 13 18 13 30s-5 22-13 30" fill="none" stroke="black" stroke-width="5" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
 
-            <form id="applyForm">
-                <div class="form-group">
-                    <label>성명</label>
-                    <input type="text" id="swal-input-name" placeholder="성함을 입력하세요" required>
-                </div>
+    <!-- 문장 탭 -->
+    <div id="listContent" class="content-area">
+        <div class="sticky-header">
+            <h3 style="margin:0">문장 목록</h3>
+            <button onclick="openEditModal()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;">추가 +</button>
+        </div>
+        <div id="sentenceList"></div>
+    </div>
 
-                <div class="form-group">
-                    <label>성별</label>
-                    <div class="radio-group">
-                        <label class="radio-item"><input type="radio" name="gender" value="남" required> 남성</label>
-                        <label class="radio-item"><input type="radio" name="gender" value="여"> 여성</label>
-                    </div>
-                </div>
+    <!-- 편집 모달 -->
+    <div id="editModal" class="overlay">
+        <div class="modal">
+            <h3 id="editTitle">문장 추가</h3>
+            <input type="hidden" id="editIndex">
+            
+            <label class="input-label">영어 문장</label>
+            <input type="text" id="inputEng" class="edit-box">
 
-                <div class="form-group">
-                    <label>나이</label>
-                    <select id="swal-input-age" required>
-                        <option value="">선택하세요</option>
-                        <option value="30대">30대</option>
-                        <option value="40대">40대</option>
-                        <option value="50대">50대</option>
-                        <option value="60대 이상">60대 이상</option>
+            <label class="input-label">한글 번역</label>
+            <input type="text" id="inputKor" class="edit-box">
+
+            <div class="flex-row">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span class="input-label" style="margin:0">중요도</span>
+                    <select id="inputLevel" style="padding:8px; border-radius:5px; border:1px solid #ddd;">
+                        <option value="1">★☆☆</option>
+                        <option value="2">★★☆</option>
+                        <option value="3">★★★</option>
                     </select>
                 </div>
-
-                <div class="form-group">
-                    <label>전화번호</label>
-                    <input type="tel" id="swal-input-phone" placeholder="010-0000-0000" maxlength="13" required>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span class="input-label" style="margin:0">암기완료</span>
+                    <input type="checkbox" id="inputDone" class="large-check">
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label>주소</label>
-                    <input type="text" id="swal-input-address" placeholder="주소를 입력해주세요" required>
-                </div>
-
-                <!-- 동의서 섹션 -->
-                <div class="agreement-section">
-                    <div style="font-size:16px; font-weight:bold; color:#444; margin-bottom:8px;">[개인정보처리동의서]</div>
-                    <div style="font-size:14px; color:#777; line-height:1.5; letter-spacing:-0.3px;">
-                        귀하는 본 설문에 개인정보(이름, 전화번호)가 활용되는 것에 동의합니다. 
-                        처리된 개인정보는 세미나 목적으로만 사용되며 [법률 제 148395호]에 의해 다른 용도나 목적으로 사용할 수 없습니다.
-                    </div>
-                    
-                    <label style="display:flex; align-items:center; margin-top:12px; cursor:pointer; font-size:17px; color:#333; font-weight:bold;">
-                        <input type="checkbox" id="swal-input-agree" required
-                               style="margin:0 8px 0 0; width:22px; height:22px; accent-color:#00A86B;">
-                        <span>동의합니다</span>
-                    </label>
-                </div>
-
-                <div class="btn-group">
-                    <button type="button" class="close-btn" onclick="toggleModal(false)">닫기</button>
-                    <button type="submit" class="submit-btn">신청합니다</button>
-                </div>
-            </form>
+            <div class="modal-footer">
+                <button class="btn-del" id="btnDelete" onclick="handleData('delete')">삭제</button>
+                <button class="btn-cancel" onclick="closeOverlay('editModal')">닫기</button>
+                <button class="btn-save" onclick="handleData('save')">저장</button>
+            </div>
         </div>
     </div>
 
-    <script>
-        function toggleModal(show) {
-            const modal = document.getElementById('modal');
-            modal.style.display = show ? 'flex' : 'none';
-            document.body.style.overflow = show ? 'hidden' : 'auto';
+    <!-- 설정 모달 -->
+    <div id="settingModal" class="overlay">
+        <div class="modal">
+            <h3 style="margin-bottom:30px;">플레이 설정</h3>
+            <div class="setting-row">
+                <span>원어민 발음 먼저 듣기</span>
+                <label class="switch"><input type="checkbox" id="setNativeFirst" checked><span class="slider"></span></label>
+            </div>
+            <div class="setting-row">
+                <span>다음 문장 자동 이동</span>
+                <label class="switch"><input type="checkbox" id="setAutoNext"><span class="slider"></span></label>
+            </div>
+            <div class="setting-row">
+                <span>대기 시간 (초)</span>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <button onclick="adjTime(-1)">-</button>
+                    <span id="waitTimeText" style="font-weight:bold; width:20px;">3</span>
+                    <button onclick="adjTime(1)">+</button>
+                </div>
+            </div>
+            <button class="btn-save" style="width:100%; margin-top:20px; border-radius:10px;" onclick="closeOverlay('settingModal')">설정 완료</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhtf2JNQYQPS6eZzo5JLKYydw5jTDWmDQ8PehFfd-xv8tv5AN4IMHiJzPJboTsZt9B/exec';
+    let sentences = [];
+    let currentIndex = 0;
+    let isPlaying = false;
+    let playTimer = null;
+    let waitSeconds = 3;
+    let mediaRecorder, audioChunks = [], audioUrl = null;
+
+    async function loadData() {
+        try {
+            const res = await fetch(SCRIPT_URL);
+            sentences = await res.json();
+            if (sentences.length > 0) updateView();
+            renderList();
+        } catch (e) { document.getElementById('displayEng').innerText = "데이터 로드 실패"; }
+    }
+
+    function updateView() {
+        if(!sentences[currentIndex]) return;
+        const s = sentences[currentIndex];
+        document.getElementById('displayEng').innerText = s.eng;
+        document.getElementById('displayKor').innerText = s.kor;
+        document.getElementById('statText').innerText = `${currentIndex + 1}/${sentences.length}`;
+        document.getElementById('progressFill').style.width = `${((currentIndex+1)/sentences.length)*100}%`;
+    }
+
+    async function togglePlay() {
+        isPlaying = !isPlaying;
+        document.getElementById('btnMainPlay').innerText = isPlaying ? "||" : "▶";
+        if (isPlaying) runLearningCycle(); else clearTimeout(playTimer);
+    }
+
+    async function runLearningCycle() {
+        if (!isPlaying) return;
+        if (document.getElementById('setNativeFirst').checked) await speakCurrent();
+        if (document.getElementById('setAutoNext').checked) {
+            playTimer = setTimeout(() => { move(1); runLearningCycle(); }, waitSeconds * 1000);
         }
+    }
 
-        // 전화번호 하이픈 자동 삽입
-        const phoneInput = document.getElementById('swal-input-phone');
-        phoneInput.addEventListener('input', (e) => {
-            let val = e.target.value.replace(/[^0-9]/g, '');
-            if (val.length <= 3) e.target.value = val;
-            else if (val.length <= 7) e.target.value = val.slice(0, 3) + '-' + val.slice(3);
-            else e.target.value = val.slice(0, 3) + '-' + val.slice(3, 7) + '-' + val.slice(7, 11);
+    function move(step) { currentIndex = (currentIndex + step + sentences.length) % sentences.length; updateView(); }
+
+    function speakCurrent() {
+        return new Promise(resolve => {
+            const msg = new SpeechSynthesisUtterance(sentences[currentIndex].eng);
+            msg.lang = 'en-US'; msg.onend = resolve;
+            window.speechSynthesis.speak(msg);
         });
+    }
 
-        // 폼 제출 이벤트
-        document.getElementById('applyForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const formData = {
-                name: document.getElementById('swal-input-name').value,
-                gender: document.querySelector('input[name="gender"]:checked').value,
-                age: document.getElementById('swal-input-age').value,
-                phone: document.getElementById('swal-input-phone').value,
-                address: document.getElementById('swal-input-address').value
-            };
-
-            await sendData(formData);
-        });
-
-        // 데이터 전송 함수
-        async function sendData(formData) {
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbw_iFKy_VrJ_VepgBgTzLoJO4_a2wHUIXCK2Q--u0rOwZ80SfFErYbVC50VRG2qGSekWw/exec';
-            
-            try {
-                Swal.fire({ 
-                    title: '전송 중...', 
-                    allowOutsideClick: false, 
-                    didOpen: () => Swal.showLoading() 
-                });
-
-                await fetch(scriptURL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-
-                await Swal.fire({
-                    icon: 'success',
-                    title: '신청 완료!',
-                    html: `<b style="font-size:1.2rem;">${formData.name}님</b><br><br>교육 신청이 정상적으로 되었습니다.`,
-                    confirmButtonColor: '#4A90E2',
-                    confirmButtonText: '확인'
-                });
-                
-                location.reload();
-                
-            } catch (error) {
-                console.error('Error!', error.message);
-                Swal.fire('오류 발생', '전송에 실패했습니다. 다시 시도해주세요.', 'error');
-            }
+    async function toggleRecord() {
+        const btn = document.getElementById('btnRecord'), icon = document.getElementById('recIcon');
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+            mediaRecorder.stop(); btn.classList.remove('recording'); icon.innerText = "🎤";
+        } else {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = () => audioUrl = URL.createObjectURL(new Blob(audioChunks, { type: 'audio/wav' }));
+            mediaRecorder.start(); btn.classList.add('recording'); icon.innerText = ""; 
         }
-    </script>
+    }
+
+    function playMyVoice() { if (audioUrl) new Audio(audioUrl).play(); else alert("먼저 녹음해 주세요."); }
+    function renderList() {
+        const container = document.getElementById('sentenceList'); container.innerHTML = '';
+        sentences.forEach((s, i) => {
+            const div = document.createElement('div'); div.className = 'sentence-item';
+            div.innerHTML = `<strong>${s.eng}</strong><br><small style="color:#888">${s.kor}</small>`;
+            div.onclick = () => openEditModal(i); container.appendChild(div);
+        });
+    }
+
+    function openEditModal(index = null) {
+        if (index !== null) {
+            const s = sentences[index];
+            document.getElementById('editIndex').value = index;
+            document.getElementById('inputEng').value = s.eng;
+            document.getElementById('inputKor').value = s.kor;
+            document.getElementById('inputLevel').value = s.importance || 1;
+            document.getElementById('inputDone').checked = s.isMemorized || false;
+            document.getElementById('btnDelete').style.display = "block";
+        } else {
+            document.getElementById('inputEng').value = ""; document.getElementById('inputKor').value = "";
+            document.getElementById('btnDelete').style.display = "none";
+        }
+        openOverlay('editModal');
+    }
+
+    async function handleData(action) {
+        // 여기에 SCRIPT_URL fetch POST 연동 로직 추가
+        alert(action + " 완료"); closeOverlay('editModal');
+    }
+
+    function switchTab(type) {
+        document.querySelectorAll('.content-area').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(type + 'Content').classList.add('active');
+        document.getElementById('tab' + type.charAt(0).toUpperCase() + type.slice(1)).classList.add('active');
+    }
+
+    function toggleKor() { document.getElementById('displayKor').classList.toggle('hidden'); }
+    function openOverlay(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
+    function adjTime(val) { waitSeconds = Math.max(1, waitSeconds + val); document.getElementById('waitTimeText').innerText = waitSeconds; }
+
+    window.onload = loadData;
+</script>
 </body>
 </html>
