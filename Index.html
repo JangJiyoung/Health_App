@@ -43,7 +43,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* 흰 배경에 맞는 은은한 그림자 */
             line-height: 0;
         }
-    
+
         .title-img { width: 100%; height: auto; display: block; }
 
         /* 메인 버튼: 이미지 폭 80%, 글자 1.5배 강조 */
@@ -89,7 +89,7 @@
             display: flex;
             flex-direction: column;
         }
-        
+
         /* 2. 타이틀 이미지 영역 고정 */
         .header-container {
             width: 100%;
@@ -98,13 +98,13 @@
             overflow: hidden;
             flex-shrink: 0; /* 이미지가 줄어들지 않도록 고정 */
         }
-        
+
         .title-img {
             width: 100%;
             height: auto;
             display: block;
         }
-        
+
         /* 3. 입력창이 이미지 폭을 절대 넘지 않도록 설정 */
         .form-group {
             display: flex;
@@ -112,14 +112,14 @@
             margin-bottom: 15px;
             width: 100%; /* 부모 너비 100% 유지 */
         }
-        
+
         .form-group label {
             width: 80px; /* 레이블 너비를 살짝 줄여 공간 확보 */
             flex-shrink: 0; /* 레이블 크기 고정 */
             font-weight: bold;
             font-size: 18px;
         }
-        
+
         /* 핵심: input의 폭을 계산하여 이미지 폭 안으로 가둠 */
         input[type="text"], 
         input[type="tel"], 
@@ -133,7 +133,7 @@
             font-size: 18px;
             background: #fafafa;
         }
-        
+
         /* 성별 라디오 그룹 정렬 */
         .radio-group {
             flex: 1;
@@ -141,7 +141,7 @@
             gap: 15px;
             min-width: 0;
         }
-        
+
         /* 4. 동의서 섹션 폭 맞춤 */
         .agreement-section {
             width: 100%;
@@ -228,7 +228,7 @@
                         귀하는 본 설문에 개인정보(이름, 전화번호)가 활용되는 것에 동의합니다. 
                         처리된 개인정보는 세미나 목적으로만 사용되며 [법률 제 148395호]에 의해 다른 용도나 목적으로 사용할 수 없습니다.
                     </div>
-                    
+
                     <label style="display:flex; align-items:center; margin-top:12px; cursor:pointer; font-size:17px; color:#333; font-weight:bold;">
                         <input type="checkbox" id="swal-input-agree" required
                                style="margin:0 8px 0 0; width:22px; height:22px; accent-color:#00A86B;">
@@ -278,7 +278,7 @@
         // 데이터 전송 함수
         async function sendData(formData) {
             const scriptURL = 'https://script.google.com/macros/s/AKfycbw_iFKy_VrJ_VepgBgTzLoJO4_a2wHUIXCK2Q--u0rOwZ80SfFErYbVC50VRG2qGSekWw/exec';
-            
+
             try {
                 Swal.fire({ 
                     title: '전송 중...', 
@@ -300,9 +300,9 @@
                     confirmButtonColor: '#4A90E2',
                     confirmButtonText: '확인'
                 });
-                
+
                 location.reload();
-                
+
             } catch (error) {
                 console.error('Error!', error.message);
                 Swal.fire('오류 발생', '전송에 실패했습니다. 다시 시도해주세요.', 'error');
